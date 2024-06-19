@@ -66,9 +66,8 @@ async def initial_data(async_session: AsyncSession):
         )
         async_session.add_all(
             [
-                FirstTable(**DATA_ENDPOINT_INITIAL_TEST_DATA[0]),
-                SecondTable(**DATA_ENDPOINT_INITIAL_TEST_DATA[1]),
-                ThirdTable(**DATA_ENDPOINT_INITIAL_TEST_DATA[2]),
+                table(**data)
+                for table, data in DATA_ENDPOINT_INITIAL_TEST_DATA.items()
             ]
         )
     await async_session.commit()
