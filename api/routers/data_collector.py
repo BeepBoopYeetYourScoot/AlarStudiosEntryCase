@@ -9,7 +9,7 @@ from db.models import FirstTable, SecondTable, ThirdTable
 router = APIRouter()
 
 
-@router.get("/data")
+@router.get("/collect-data")
 async def collect_data(session: AsyncSession = Depends(get_session)):
     result = []
     for table in (FirstTable, SecondTable, ThirdTable):
