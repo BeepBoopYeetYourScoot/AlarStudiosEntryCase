@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.connection import get_session
 from db.models import FirstTable, SecondTable, ThirdTable
 
-router = APIRouter()
+data_collection_router = APIRouter()
 
 
-@router.get("/collect-data")
+@data_collection_router.get("/collect-data")
 async def collect_data(session: AsyncSession = Depends(get_session)):
     result = []
     for table in (FirstTable, SecondTable, ThirdTable):
