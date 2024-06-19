@@ -5,7 +5,9 @@ Test Task Back-end Developer (Python)
 
 1. Clone project: `git clone https://github.com/BeepBoopYeetYourScoot/AlarStudiosEntryCase`
 2. Install dependencies: `pip install -r requirements.txt`
-3. Run FastAPI application: `uvicorn main:app reload`
+3. Run alembic migrations: `alembic upgrade head`
+4. Run FastAPI application: `uvicorn main:app --reload`
+
 
 ### Solution: 
 - Data collection endpoint: `/collect-data`
