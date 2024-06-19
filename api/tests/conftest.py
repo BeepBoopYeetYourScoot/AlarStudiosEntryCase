@@ -11,9 +11,12 @@ from api.tests.constants import DATA_ENDPOINT_INITIAL_TEST_DATA
 from db.connection import get_session
 from db.models import Base, FirstTable, SecondTable, ThirdTable
 from main import app
+from settings.settings import DATABASE
 
 TEST_DATABASE_URL = (
-    "postgresql+asyncpg://postgres:root_password@localhost:5432/test"
+    f"postgresql+asyncpg://"
+    f"{DATABASE['USER']}:{DATABASE['PASSWORD']}@"
+    f"{DATABASE['HOST']}:{DATABASE['PORT']}/{DATABASE['TEST_DB_NAME']}"
 )
 
 test_engine = engine = create_async_engine(
