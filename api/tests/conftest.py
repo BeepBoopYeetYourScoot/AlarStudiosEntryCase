@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 from api.tests.constants import DATA_ENDPOINT_INITIAL_TEST_DATA
 from db.connection import get_session
-from db.models import Base, FirstTable, SecondTable, ThirdTable
+from db.models import Base
 from main import app
 from settings.settings import DATABASE
 
