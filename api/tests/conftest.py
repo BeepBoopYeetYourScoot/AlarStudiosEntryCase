@@ -1,14 +1,13 @@
-from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 import loguru
-import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+from api.tests.constants import DATA_ENDPOINT_INITIAL_TEST_DATA
 from db.connection import get_session
 from db.models import Base, FirstTable, SecondTable, ThirdTable
 from main import app
@@ -26,7 +25,7 @@ TestSessionLocal = sessionmaker(
 )
 
 
-async def get_test_session():
+async def get_test_session() -> AsyncGenerator[AsyncSession, None]:
     async with TestSessionLocal() as session:
         yield session
 
@@ -35,19 +34,19 @@ app.dependency_overrides[get_session] = get_test_session
 
 
 @pytest_asyncio.fixture
-def client():
+def client() -> AsyncClient:
     return AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     )
 
 
 @pytest_asyncio.fixture(scope="function")
-async def async_session():
+async def async_session() -> AsyncGenerator[AsyncSession, None]:
     async with TestSessionLocal() as session:
         yield session
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="function", autouse=True)
 async def create_test_database():
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -59,12 +58,14 @@ async def create_test_database():
 @pytest_asyncio.fixture(scope="function")
 async def initial_data(async_session: AsyncSession):
     async with async_session.begin():
-        loguru.logger.debug(f"Accessing {async_session}")
+        loguru.logger.debug(
+            f"Accessing {async_session} inside {initial_data} method"
+        )
         async_session.add_all(
             [
-                FirstTable(id=1, name="bruh"),
-                SecondTable(id=11, name="bruh"),
-                ThirdTable(id=21, name="bruh"),
+                FirstTable(**DATA_ENDPOINT_INITIAL_TEST_DATA[0]),
+                SecondTable(**DATA_ENDPOINT_INITIAL_TEST_DATA[1]),
+                ThirdTable(**DATA_ENDPOINT_INITIAL_TEST_DATA[2]),
             ]
         )
     await async_session.commit()
