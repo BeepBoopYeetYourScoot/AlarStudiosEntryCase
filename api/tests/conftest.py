@@ -4,11 +4,16 @@ import loguru
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    AsyncSession,
+    async_sessionmaker,
+)
 
+from api.routers.data_collector import (
+    get_sessions_for_tables,
+)
 from api.tests.constants import DATA_ENDPOINT_INITIAL_TEST_DATA
-from db.connection import get_session
 from db.models import Base
 from main import app
 from settings.settings import DATABASE
@@ -23,17 +28,20 @@ test_engine = engine = create_async_engine(
     TEST_DATABASE_URL, echo=True, poolclass=NullPool
 )
 
-TestSessionLocal = sessionmaker(
-    test_engine, class_=AsyncSession, expire_on_commit=False
+TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
+
+
+def get_test_data_sources():
+    return list(DATA_ENDPOINT_INITIAL_TEST_DATA.keys())
+
+
+def get_test_sessions_for_tables():
+    return [TestSessionLocal() for _ in range(len(get_test_data_sources()))]
+
+
+app.dependency_overrides[get_sessions_for_tables] = (
+    get_test_sessions_for_tables
 )
-
-
-async def get_test_session() -> AsyncGenerator[AsyncSession, None]:
-    async with TestSessionLocal() as session:
-        yield session
-
-
-app.dependency_overrides[get_session] = get_test_session
 
 
 @pytest_asyncio.fixture
