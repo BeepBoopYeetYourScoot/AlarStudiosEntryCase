@@ -25,7 +25,10 @@ TEST_DATABASE_URL = (
 )
 
 test_engine = engine = create_async_engine(
-    TEST_DATABASE_URL, echo=True, poolclass=NullPool
+    TEST_DATABASE_URL,
+    echo=True,
+    poolclass=NullPool,
+    connect_args={"timeout": 2},
 )
 
 TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)

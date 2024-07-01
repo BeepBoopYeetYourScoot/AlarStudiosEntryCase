@@ -27,7 +27,7 @@ async def collect_data(
     tables=Depends(get_data_sources),
     sessions=Depends(get_sessions_for_tables),
 ):
-    loguru.logger.debug(f"{sessions=}")
+    loguru.logger.debug(f"Querying {tables=} with {sessions=}")
     queries = [
         session.execute(select(table))
         for session, table in zip(sessions, tables)
@@ -38,7 +38,11 @@ async def collect_data(
         if not isinstance(result, Exception):
             results.extend(result.scalars().all())
         else:
-            loguru.logger.debug(f"Got '{result}' when accessing sources.")
-    await asyncio.gather(*[session.close() for session in sessions])
+            loguru.logger.debug(
+                f"Got error='{result}' when accessing sources."
+            )
+    await asyncio.gather(
+        *[session.close() for session in sessions], return_exceptions=True
+    )
     results.sort(key=lambda obj: obj.id)
     return results
